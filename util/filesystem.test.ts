@@ -1,9 +1,8 @@
-import {projectPath} from './filesystem';
+import {isDirectory, projectPath} from './filesystem';
+import * as fs from 'fs';
 
 describe('projectPath', () => {
   it('works', () => {
-    expect(projectPath('data/simple_board')).toMatch(
-      /cardboard\/data\/simple_board/,
-    );
+    expect(fs.existsSync(projectPath('data/simple_board'))).toBe(true);
   });
 });
