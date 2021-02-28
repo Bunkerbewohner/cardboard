@@ -15,6 +15,7 @@ target 'cardboard-macOS' do
   )
 
   # Pods specifically for macOS target
+  #pod 'RNFS', :path => '../../react-native-fs'
 end
 
 target 'cardboard-iOS' do

@@ -1,14 +1,14 @@
-import * as fs from 'fs';
-import {basename, join} from 'path';
-import matter from 'gray-matter';
-import * as path from 'path';
-import * as assert from 'assert';
-import {isDirectory} from '../util/filesystem';
+import matter from 'front-matter';
+import {basename, isDirectory, readdir, readFile} from '../util/filesystem';
 
 export interface CardboardData {
   boardName: string;
   description?: string;
   buckets: BucketData[];
+}
+
+export interface CardboardMatter {
+  title?: string;
 }
 
 export interface BucketData {
@@ -18,13 +18,24 @@ export interface BucketData {
   cards: CardData[];
 }
 
+export interface BucketMatter {
+  title?: string;
+  column?: number;
+}
+
 export interface CardData {
   id: string; // <PREFIX>-<HASH>
   title: string;
   position: number;
 }
 
+export interface CardMatter {
+  title?: string;
+  position?: number;
+}
+
 export async function loadCardboard(path: string): Promise<CardboardData> {
+  console.log(`Loading cardboard from '${path}...`);
   const board = await loadCardboardMeta(path);
   board.buckets = await loadBuckets(path);
 
@@ -32,20 +43,18 @@ export async function loadCardboard(path: string): Promise<CardboardData> {
 }
 
 export async function loadBuckets(path: string): Promise<BucketData[]> {
-  const files = await fs.promises.readdir(path);
+  const files = await readdir(path);
   const buckets: BucketData[] = [];
 
   for (let file of files) {
+    const fullpath = path + '/' + file;
     if (file !== 'board.md' && file.endsWith('.md')) {
       throw new Error(
-        `Unexpected markdown file ${join(
-          path,
-          file,
-        )}: Cards must be in a bucket (subfolder)`,
+        `Unexpected markdown file ${fullpath}: Cards must be in a bucket (subfolder)`,
       );
     } else if (file !== 'board.md') {
-      const bucket = await loadBucketMeta(join(path, file));
-      bucket.cards = await loadCardsFromBucket(join(path, file));
+      const bucket = await loadBucketMeta(fullpath);
+      bucket.cards = await loadCardsFromBucket(fullpath);
       buckets.push(bucket);
     }
   }
@@ -56,14 +65,15 @@ export async function loadBuckets(path: string): Promise<BucketData[]> {
 export async function loadCardsFromBucket(
   bucketPath: string,
 ): Promise<CardData[]> {
-  const files = await fs.promises.readdir(bucketPath);
+  const files = await readdir(bucketPath);
   const cards: CardData[] = [];
 
   for (let file of files) {
+    const fullpath = bucketPath + '/' + file;
     if (file.endsWith('.md')) {
-      cards.push(await loadCardMeta(join(bucketPath, file)));
-    } else if (await isDirectory(join(bucketPath, file))) {
-      cards.push(await loadCardFolder(join(bucketPath, file)));
+      cards.push(await loadCardMeta(fullpath));
+    } else if (await isDirectory(fullpath)) {
+      cards.push(await loadCardFolder(fullpath));
     } else {
       // silently ignore unknown files
     }
@@ -74,7 +84,7 @@ export async function loadCardsFromBucket(
 
 export async function loadCardFolder(cardPath: string): Promise<CardData> {
   try {
-    const card = await loadCardMeta(join(cardPath, 'card.md'));
+    const card = await loadCardMeta(cardPath + '/card.md');
     card.id = basename(cardPath);
 
     return card;
@@ -89,14 +99,13 @@ export async function loadCardFolder(cardPath: string): Promise<CardData> {
 }
 
 export async function loadCardMeta(file: string): Promise<CardData> {
-  const markdown = (await fs.promises.readFile(file)).toString();
-
-  const frontmatter = matter(markdown);
+  const markdown = (await readFile(file)).toString();
+  const frontmatter = matter<CardMatter>(markdown);
 
   return {
-    title: frontmatter.data.title || loadCardTitle(frontmatter.content),
+    title: frontmatter.attributes.title || loadCardTitle(frontmatter.body),
     id: basename(file).split('.', 2)[0],
-    position: frontmatter.data.position || 0,
+    position: frontmatter.attributes.position || 0,
   };
 }
 
@@ -112,15 +121,12 @@ export function loadCardTitle(markdown: string): string {
 
 export async function loadBucketMeta(file: string): Promise<BucketData> {
   try {
-    const markdown = (
-      await fs.promises.readFile(join(file, 'bucket.md'))
-    ).toString();
-
-    const frontmatter = matter(markdown);
+    const markdown = (await readFile(file + '/bucket.md')).toString();
+    const frontmatter = matter<BucketMatter>(markdown);
 
     return {
-      title: frontmatter.data.title || frontmatter.content || basename(file),
-      column: parseInt(frontmatter.data.column || '0', 10) || 0,
+      title: frontmatter.attributes.title || frontmatter.body || basename(file),
+      column: frontmatter.attributes.column || 0,
       cards: [],
       id: basename(file),
     };
@@ -136,15 +142,12 @@ export async function loadBucketMeta(file: string): Promise<BucketData> {
 
 export async function loadCardboardMeta(file: string): Promise<CardboardData> {
   try {
-    const markdown = (
-      await fs.promises.readFile(file + '/board.md')
-    ).toString();
-
-    const frontmatter = matter(markdown);
+    const markdown = (await readFile(file + '/board.md')).toString();
+    const frontmatter = matter<CardboardMatter>(markdown);
 
     return {
-      boardName: frontmatter.data.title || basename(file),
-      description: frontmatter.content,
+      boardName: frontmatter.attributes.title || basename(file),
+      description: frontmatter.body,
       buckets: [],
     };
   } catch (ex) {

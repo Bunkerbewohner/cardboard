@@ -5,14 +5,18 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "macos": "react-native run-macos",
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "gray-matter": "^4.0.2",
+    "buffer": "^6.0.3",
+    "front-matter": "^4.0.2",
+    "git": "^0.1.5",
     "react": "16.13.1",
     "react-native": "0.63.4",
+    "react-native-fs": "git@github.com:Bunkerbewohner/react-native-fs.git",
     "react-native-macos": "^0.63.0-0"
   },
   "devDependencies": {
