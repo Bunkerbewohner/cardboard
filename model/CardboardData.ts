@@ -70,7 +70,7 @@ export async function loadCardsFromBucket(
 
   for (let file of files) {
     const fullpath = bucketPath + '/' + file;
-    if (file.endsWith('.md')) {
+    if (file !== 'bucket.md' && file.endsWith('.md')) {
       cards.push(await loadCardMeta(fullpath));
     } else if (await isDirectory(fullpath)) {
       cards.push(await loadCardFolder(fullpath));
