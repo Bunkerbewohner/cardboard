@@ -14,6 +14,8 @@
     "buffer": "^6.0.3",
     "front-matter": "^4.0.2",
     "git": "^0.1.5",
+    "mobx": "^6.1.8",
+    "mobx-react": "^7.1.0",
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-fs": "git@github.com:Bunkerbewohner/react-native-fs.git",

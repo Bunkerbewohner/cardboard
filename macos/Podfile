@@ -6,7 +6,7 @@ target 'cardboard-macOS' do
   use_native_modules!
   use_react_native!(
     :path => '../node_modules/react-native-macos',
-    
+
     # To use Hermes, install the `hermes-engine-darwin` npm package, e.g.:
     #   $ yarn add 'hermes-engine-darwin@~0.5.3'
     #
@@ -15,7 +15,7 @@ target 'cardboard-macOS' do
   )
 
   # Pods specifically for macOS target
-  #pod 'RNFS', :path => '../../react-native-fs'
+  pod 'RNFS', :path => '../../react-native-fs'
 end
 
 target 'cardboard-iOS' do
