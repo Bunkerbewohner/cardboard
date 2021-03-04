@@ -1,5 +1,11 @@
 import matter from 'front-matter';
-import {basename, isDirectory, readdir, readFile} from '../util/filesystem';
+import {
+  basename,
+  isDirectory,
+  readdir,
+  readFile,
+  stripFileExtension,
+} from '../util/filesystem';
 
 export interface CardboardData {
   boardName: string;
@@ -103,10 +109,17 @@ export async function loadCardMeta(file: string): Promise<CardData> {
   const frontmatter = matter<CardMatter>(markdown);
 
   return {
-    title: frontmatter.attributes.title || loadCardTitle(frontmatter.body),
+    title:
+      frontmatter.attributes.title ||
+      loadCardTitle(frontmatter.body) ||
+      getFilenameAsTile(file),
     id: basename(file).split('.', 2)[0],
     position: frontmatter.attributes.position || 0,
   };
+}
+
+function getFilenameAsTile(file: string): string {
+  return stripFileExtension(basename(file));
 }
 
 export function loadCardTitle(markdown: string): string {

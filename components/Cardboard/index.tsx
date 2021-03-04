@@ -1,5 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, PanResponder, StyleSheet, Text, View} from 'react-native';
+import {
+  Animated,
+  GestureResponderEvent,
+  PanResponder,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {CardboardData, CardData} from '../../model/CardboardData';
 import Bucket from '../Bucket';
 import DraggingCard from '../DraggingCard';
@@ -28,14 +35,18 @@ const Cardboard = observer(({board}: CardboardProps) => {
           useNativeDriver: false,
         },
       ),
-      onPanResponderRelease: () => {
-        //pan.flattenOffset();
-      },
     }),
   ).current;
 
+  const onTouchMove = (e: GestureResponderEvent) => {
+    UIState.checkForDrop(e.nativeEvent.pageX, e.nativeEvent.pageY);
+  };
+
   return (
-    <View style={styles.root} {...panResponder.panHandlers}>
+    <View
+      style={styles.root}
+      {...panResponder.panHandlers}
+      onTouchMove={onTouchMove}>
       <View style={styles.header}>
         <Text style={styles.title}>Hello, {board.boardName}!</Text>
       </View>

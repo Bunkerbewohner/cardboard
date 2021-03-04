@@ -1,27 +1,68 @@
-import React from 'react';
-import {BucketData} from '../../model/CardboardData';
+import React, {useEffect, useRef, useState} from 'react';
+import {BucketData, CardData} from '../../model/CardboardData';
 import {View, Text, StyleSheet} from 'react-native';
-import Card from '../Card';
+import Card, {DropSlot} from '../Card';
+import {observer} from 'mobx-react';
+import UIState from '../../model/UIState';
 
 interface BucketProps {
   bucket: BucketData;
 }
 
-const Bucket = ({bucket}: BucketProps) => {
+interface BucketSliceProps {
+  bucket: BucketData;
+  card: CardData;
+}
+
+const BucketSlice = ({bucket, card}: BucketSliceProps) => {
   return (
-    <View style={styles.root}>
+    <>
+      <Card card={card} bucket={bucket} />
+      <DropSlot bucket={bucket} card={card} />
+    </>
+  );
+};
+
+const Bucket = observer(({bucket}: BucketProps) => {
+  const [isDropTarget, setIsDropTarget] = useState(false);
+  const viewRef = useRef<View>(null);
+
+  const onLayout = () => {
+    viewRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      UIState.registerBucketLayout(bucket, {x: pageX, y: pageY, width, height});
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      UIState.unregisterBucketLayout(bucket);
+    };
+  }, [bucket]);
+
+  return (
+    <View style={styles.root} onLayout={onLayout} ref={viewRef}>
       <View style={styles.bucket}>
         <Text style={styles.title}>{bucket.title}</Text>
 
         <View style={styles.cardContainer}>
+          <DropSlot bucket={bucket} card={undefined} />
+
           {bucket.cards.map((card) => (
-            <Card key={card.id} card={card} />
+            <BucketSlice key={card.id} bucket={bucket} card={card} />
           ))}
+
+          {UIState.dragging && isDropTarget && (
+            <Card
+              card={UIState.dragging.card}
+              bucket={bucket}
+              isDragging={true}
+            />
+          )}
         </View>
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   root: {
@@ -41,6 +82,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   cardContainer: {},
+  bucketSlice: {
+    flexDirection: 'column',
+  },
 });
 
 export default Bucket;

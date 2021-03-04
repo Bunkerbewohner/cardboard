@@ -23,7 +23,7 @@ const DraggingCard = ({card, size, pan}: Props) => {
         },
         {width: size.width, height: size.height},
       ]}>
-      <Card card={card} />
+      <Card card={card} bucket={null} />
     </Animated.View>
   );
 };

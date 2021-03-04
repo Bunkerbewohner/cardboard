@@ -22,6 +22,10 @@ export function basename(filePath: string): string {
   return parts[parts.length - 1];
 }
 
+export function stripFileExtension(filename: string): string {
+  return filename.replace(/\..+$/, '');
+}
+
 export async function readdir(path: string): Promise<string[]> {
   return rnfs.readdir(path);
 }
