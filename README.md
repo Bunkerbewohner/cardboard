@@ -2,7 +2,7 @@
 
 File-based kanban board that lives next to your code.
 
-![screenshot](screenshots/v1.png)
+![screenshot](screenshots/v2.png)
 
 ## About
 

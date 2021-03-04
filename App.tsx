@@ -9,13 +9,7 @@
  */
 
 import React, {useEffect, useState} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  Text,
-  StatusBar,
-} from 'react-native';
+import {SafeAreaView, Text, StatusBar} from 'react-native';
 
 import {CardboardData, loadCardboard} from './model/CardboardData';
 import Cardboard from './components/Cardboard';
@@ -39,26 +33,10 @@ const App = () => {
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={styles.scrollViewContainer}
-          style={styles.scrollView}>
-          {(board && <Cardboard board={board} />) || <Text>Loading...</Text>}
-        </ScrollView>
+        {(board && <Cardboard board={board} />) || <Text>Loading...</Text>}
       </SafeAreaView>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flexDirection: 'column',
-  },
-  scrollViewContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-});
 
 export default App;
