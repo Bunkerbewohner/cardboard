@@ -2,6 +2,7 @@ import {makeAutoObservable, runInAction} from 'mobx';
 import {
   BucketData,
   CardboardData,
+  CardData,
   createBucket,
   createCard,
   defaultCardboard,
@@ -68,6 +69,56 @@ class CardboardState {
     } while (true);
 
     bucket.cards.push(card);
+  }
+
+  moveCard(
+    card: CardData,
+    destinationBucketId: string,
+    insertAfter?: CardData,
+  ) {
+    const sourceBucket = this.getCardBucket(card);
+    const destBucket = this.getBucket(destinationBucketId);
+
+    if (!sourceBucket || !destBucket) {
+      throw new Error(
+        'invalid card move: source or destination bucket not found',
+      );
+    }
+
+    const sourceIndex = sourceBucket.cards.findIndex((c) => c.id === card.id);
+    sourceBucket.cards.splice(sourceIndex, 1);
+
+    if (!insertAfter) {
+      destBucket.cards.splice(0, 0, card);
+    } else {
+      const index = destBucket.cards.findIndex((c) => c.id === insertAfter.id);
+      if (index < 0) {
+        throw new Error(
+          `invalid card move: card to insert after not found - '${insertAfter.title}'`,
+        );
+      }
+
+      if (index < destBucket.cards.length - 1) {
+        destBucket.cards.splice(index + 1, 0, card);
+      } else {
+        destBucket.cards.push(card);
+      }
+    }
+  }
+
+  getCardBucket(card: CardData): BucketData | undefined {
+    // TODO: Optimize this
+    for (let bucket of this.cardboard.buckets) {
+      if (bucket.cards.find((c) => c.id === card.id)) {
+        return bucket;
+      }
+    }
+
+    return undefined;
+  }
+
+  getBucket(id: string): BucketData | undefined {
+    return this.cardboard.buckets.find((b) => b.id === id);
   }
 
   numColumns() {

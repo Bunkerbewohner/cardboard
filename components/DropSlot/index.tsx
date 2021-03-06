@@ -7,7 +7,10 @@ import {useEffect} from 'react';
 import {CARD_MARGIN_TOP} from '../theme';
 
 interface DropSlotProps {
-  card?: CardData; // if undefined that means it's the first drop slot at the top
+  /**
+   * the card which immediately precedes this drop slot, or undefined for the top
+   */
+  card?: CardData;
   bucket: BucketData;
 }
 

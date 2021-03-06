@@ -46,6 +46,7 @@ const Cardboard = observer(({board}: CardboardProps) => {
           useNativeDriver: false,
         },
       ),
+      onPanResponderEnd: (e) => UIState.commitDrop(),
     }),
   ).current;
 

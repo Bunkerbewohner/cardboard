@@ -1,6 +1,7 @@
 import {makeAutoObservable} from 'mobx';
 import {BucketData, CardData} from './CardboardData';
 import {Animated, LayoutRectangle} from 'react-native';
+import CardboardState from './CardboardState';
 
 export interface DragInfo {
   bucket: BucketData;
@@ -107,6 +108,17 @@ class UIState {
     this.bucketLayouts = this.bucketLayouts.filter(
       (b) => b.bucket.id !== bucket.id,
     );
+  }
+
+  commitDrop() {
+    if (!this.dragging || !this.dropTarget) {
+      return;
+    }
+
+    const card = this.dragging.card;
+    const insertAfter = this.dropTarget?.card;
+
+    CardboardState.moveCard(card, this.dropTarget.bucket.id, insertAfter);
   }
 
   checkForDrop(x: number, y: number) {
