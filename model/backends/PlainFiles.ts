@@ -77,10 +77,9 @@ export async function loadCardFolder(cardPath: string): Promise<CardData> {
 
     return card;
   } catch (ex) {
-    console.error(`Failed to load card from ${cardPath}`, ex);
     return {
       id: basename(cardPath),
-      title: `Failed to load ${basename(cardPath)}`,
+      title: basename(cardPath),
       position: 0,
     };
   }

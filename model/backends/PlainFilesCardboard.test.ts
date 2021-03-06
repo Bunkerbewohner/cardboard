@@ -22,11 +22,13 @@ describe('loadCardboard', () => {
     const doing = board.buckets[1].cards;
     expect(doing).toEqual<CardData[]>([
       {id: 'cb-3', title: 'proof of concept', position: 0},
+      {id: 'develop it', title: 'develop it', position: 0},
     ]);
 
     const done = board.buckets[2].cards;
     expect(done).toEqual<CardData[]>([
       {id: 'cb-5', title: 'Setup react native with macOS support', position: 0},
+      {id: 'empty', title: 'empty', position: 0},
     ]);
   });
 });
