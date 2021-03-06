@@ -1,9 +1,14 @@
 import * as React from 'react';
 import {StyleSheet, Text, TouchableOpacity} from 'react-native';
+import CardboardState from '../../model/CardboardState';
 
-const AddBucketButton = () => {
+interface Props {}
+
+const AddBucketButton = (_: Props) => {
   return (
-    <TouchableOpacity style={styles.root} onPress={() => {}}>
+    <TouchableOpacity
+      style={styles.root}
+      onPress={() => CardboardState.addBucket()}>
       <Text style={styles.label}>+</Text>
     </TouchableOpacity>
   );

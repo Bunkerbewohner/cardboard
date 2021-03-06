@@ -4,6 +4,7 @@ import {
   Animated,
   GestureResponderEvent,
   ImageBackground,
+  Keyboard,
   PanResponder,
   StyleSheet,
   Text,

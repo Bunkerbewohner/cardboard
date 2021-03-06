@@ -16,10 +16,12 @@
     "git": "^0.1.5",
     "mobx": "^6.1.8",
     "mobx-react": "^7.1.0",
+    "nanoid": "^3.1.20",
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-fs": "git@github.com:Bunkerbewohner/react-native-fs.git",
-    "react-native-macos": "^0.63.0-0"
+    "react-native-macos": "^0.63.0-0",
+    "sanitize-filename": "^1.6.3"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",

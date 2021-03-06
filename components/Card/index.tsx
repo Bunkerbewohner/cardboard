@@ -7,58 +7,23 @@ import {
   StyleSheet,
   Text,
   View,
-  ViewStyle,
 } from 'react-native';
 import UIState from '../../model/UIState';
 import {observer} from 'mobx-react';
+import {CARD_MARGIN_TOP} from '../theme';
 
 interface CardProps {
-  card: CardData;
+  card?: CardData;
   bucket: BucketData | null;
   isDragging?: boolean; // set to true for the representation of a card being dragged
+  children?: React.ReactNode;
 }
 
-const MARGIN_TOP = 5;
+const Card = observer(({card, bucket, isDragging, children}: CardProps) => {
+  if (!card && !children) {
+    throw new Error('Card needs either card data or explicit children');
+  }
 
-interface DropSlotProps {
-  card?: CardData; // if undefined that means it's the first drop slot at the top
-  bucket: BucketData;
-}
-
-export const DropSlot = observer(({bucket, card}: DropSlotProps) => {
-  const onLayout = (e: LayoutChangeEvent) => {
-    if (bucket) {
-      UIState.registerDropSlot(bucket, e.nativeEvent.layout, card);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (bucket) {
-        UIState.unregisterDropSlot(bucket, card);
-      }
-    };
-  }, []);
-
-  const dropTarget = UIState.dropTarget;
-  const hover =
-    dropTarget &&
-    dropTarget.bucket.id === bucket.id &&
-    (card ? dropTarget.card?.id === card.id : !dropTarget.card);
-
-  return (
-    <View
-      onLayout={onLayout}
-      style={[
-        styles.dropSlot,
-        hover && styles.dropSlotActive,
-        hover && {height: UIState.dragging?.layout?.height || 50},
-      ]}
-    />
-  );
-});
-
-const Card = observer(({card, bucket, isDragging}: CardProps) => {
   const [touched, setTouched] = useState(false);
   const [dragging, setDragging] = useState(isDragging);
   const layoutRect = useRef({
@@ -69,7 +34,7 @@ const Card = observer(({card, bucket, isDragging}: CardProps) => {
   const onTouchStart = (_: GestureResponderEvent) => {
     viewRef.current?.measure((_x, _y, width, height, pageX, pageY) => {
       layoutRect.current.layout.x = pageX;
-      layoutRect.current.layout.y = pageY - MARGIN_TOP / 2;
+      layoutRect.current.layout.y = pageY - CARD_MARGIN_TOP / 2;
       layoutRect.current.layout.width = width;
       layoutRect.current.layout.height = height;
       setTouched(true);
@@ -77,7 +42,7 @@ const Card = observer(({card, bucket, isDragging}: CardProps) => {
   };
 
   const onTouchMove = (e: GestureResponderEvent) => {
-    if (touched && !isDragging) {
+    if (card && touched && !isDragging) {
       UIState.onDragStart({
         bucket: bucket!,
         layout: layoutRect.current.layout,
@@ -89,21 +54,23 @@ const Card = observer(({card, bucket, isDragging}: CardProps) => {
   };
 
   const onTouchEnd = (_: GestureResponderEvent) => {
-    if (!isDragging) {
-      setDragging(false);
+    if (card) {
+      if (!isDragging) {
+        setDragging(false);
+      }
+      UIState.onDragEnd();
     }
-    UIState.onDragEnd();
   };
 
   const onLayout = (e: LayoutChangeEvent) => {
-    if (!isDragging && !!bucket) {
+    if (card && !isDragging && !!bucket) {
       UIState.registerCardLayout(bucket, card, e.nativeEvent.layout);
     }
   };
 
   useEffect(() => {
     return () => {
-      if (bucket) {
+      if (card && bucket) {
         UIState.unregisterCardLayout(bucket, card);
       }
     };
@@ -123,7 +90,10 @@ const Card = observer(({card, bucket, isDragging}: CardProps) => {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       onTouchMove={onTouchMove}>
-      <Text style={dragging && styles.draggingText}>{card.title}</Text>
+      {children ||
+        (card && (
+          <Text style={dragging && styles.draggingText}>{card.title}</Text>
+        ))}
     </View>
   );
 });
@@ -137,7 +107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 8,
     marginBottom: 5,
-    marginTop: MARGIN_TOP,
+    marginTop: CARD_MARGIN_TOP,
     minHeight: 50,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.4,
@@ -153,14 +123,5 @@ const styles = StyleSheet.create({
   },
   draggingText: {
     opacity: 0,
-  },
-  dropSlot: {
-    height: 0,
-  },
-  dropSlotActive: {
-    backgroundColor: '#c8c8c8',
-    borderRadius: 4,
-    marginTop: MARGIN_TOP,
-    marginBottom: 5,
   },
 });

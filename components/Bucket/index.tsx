@@ -1,9 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {BucketData, CardData} from '../../model/CardboardData';
 import {View, Text, StyleSheet} from 'react-native';
-import Card, {DropSlot} from '../Card';
+import Card from '../Card';
 import {observer} from 'mobx-react';
 import UIState from '../../model/UIState';
+import AddCardButton from '../AddCardButton';
+import DropSlot from '../DropSlot';
 
 interface BucketProps {
   bucket: BucketData;
@@ -58,6 +60,8 @@ const Bucket = observer(({bucket}: BucketProps) => {
               isDragging={true}
             />
           )}
+
+          <AddCardButton bucket={bucket} />
         </View>
       </View>
     </View>
@@ -66,7 +70,8 @@ const Bucket = observer(({bucket}: BucketProps) => {
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
+    flex: 0,
+    flexBasis: 300,
     flexDirection: 'column',
     maxWidth: 300,
   },
