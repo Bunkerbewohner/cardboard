@@ -1,5 +1,6 @@
-import {CardData, loadCardboard} from './CardboardData';
-import {projectPath} from '../util/filesystem';
+import {loadCardboard} from './PlainFiles';
+import {projectPath} from '../../util/filesystem';
+import {CardData} from '../CardboardData';
 
 describe('loadCardboard', () => {
   it('loads a simple board', async () => {

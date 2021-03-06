@@ -16,3 +16,8 @@ It's based on the following great technologies:
  * [React Native](https://reactnative.dev/)
  * [React Native for Windows + macOS](https://microsoft.github.io/react-native-windows/)
  * [TypeScript](https://www.typescriptlang.org/)
+
+
+## Further Reading
+
+* https://www.geoffreylitt.com/2021/03/05/bring-your-own-client.html
