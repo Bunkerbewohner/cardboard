@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     flexDirection: 'column',
+    maxWidth: 300,
   },
   bucket: {
     flex: 0,

@@ -4,6 +4,13 @@ export interface CardboardData {
   buckets: BucketData[];
 }
 
+export function defaultCardboard() {
+  return {
+    boardName: 'New Cardboard',
+    buckets: [],
+  };
+}
+
 export interface CardboardMatter {
   title?: string;
 }

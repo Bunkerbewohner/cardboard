@@ -1,26 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {SafeAreaView, Text, StatusBar} from 'react-native';
 
-import {CardboardData} from './model/CardboardData';
 import Cardboard from './components/Cardboard';
-import {PlainFiles} from './model/backends/PlainFiles';
+import CardboardState from './model/CardboardState';
+import {observer} from 'mobx-react';
 
 declare const global: {HermesInternal: null | {}};
 
-const backend = new PlainFiles();
+CardboardState.loadCardboard('/Users/mathias/Code/cardboard/data/simple_board');
 
-const App = () => {
-  const [board, setBoard] = useState<CardboardData | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const b = await backend.loadCardboard(
-        '/Users/mathias/Code/cardboard/data/simple_board',
-      );
-      console.log(`Loaded board ${b.boardName}`);
-      setBoard(b);
-    })();
-  }, []);
+const App = observer(() => {
+  const board = CardboardState.cardboard;
 
   return (
     <>
@@ -30,6 +20,6 @@ const App = () => {
       </SafeAreaView>
     </>
   );
-};
+});
 
 export default App;

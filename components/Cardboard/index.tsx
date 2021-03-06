@@ -1,5 +1,6 @@
 import React, {useRef} from 'react';
 import {
+  ActivityIndicator,
   Animated,
   GestureResponderEvent,
   ImageBackground,
@@ -17,6 +18,8 @@ import UIState from '../../model/UIState';
 
 // @ts-ignore
 import backgroundImage from '../../backgrounds/mountains.jpg';
+import AddBucketButton from '../AddBucketButton';
+import CardboardState from '../../model/CardboardState';
 
 interface CardboardProps {
   board: CardboardData;
@@ -53,8 +56,8 @@ const Cardboard = observer(({board}: CardboardProps) => {
     <ImageBackground
       source={backgroundImage}
       style={{
-        width: dimensions.width,
-        height: dimensions.height,
+        width: '100%', //dimensions.width,
+        height: '100%', // dimensions.height,
       }}
       imageStyle={{
         bottom: undefined,
@@ -62,29 +65,41 @@ const Cardboard = observer(({board}: CardboardProps) => {
         height: dimensions.height,
         resizeMode: 'cover',
       }}>
-      <View
-        style={styles.root}
-        {...panResponder.panHandlers}
-        onTouchMove={onTouchMove}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Hello, {board.boardName}!</Text>
-        </View>
-        <View style={styles.buckets}>
-          {board.buckets.map((bucket) => (
-            <Bucket key={bucket.id} bucket={bucket} />
-          ))}
-        </View>
-        {UIState.dragging && (
-          <DraggingCard
-            card={UIState.dragging.card}
-            size={{
-              width: UIState.dragging.layout.width,
-              height: UIState.dragging.layout.height,
-            }}
-            pan={UIState.pan}
+      {CardboardState.loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator
+            color={'white'}
+            style={styles.loading}
+            size={'large'}
           />
-        )}
-      </View>
+        </View>
+      )}
+      {!CardboardState.loading && (
+        <View
+          style={styles.root}
+          {...panResponder.panHandlers}
+          onTouchMove={onTouchMove}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Hello, {board.boardName}!</Text>
+          </View>
+          <View style={styles.buckets}>
+            {board.buckets.map((bucket) => (
+              <Bucket key={bucket.id} bucket={bucket} />
+            ))}
+            <AddBucketButton />
+          </View>
+          {UIState.dragging && (
+            <DraggingCard
+              card={UIState.dragging.card}
+              size={{
+                width: UIState.dragging.layout.width,
+                height: UIState.dragging.layout.height,
+              }}
+              pan={UIState.pan}
+            />
+          )}
+        </View>
+      )}
     </ImageBackground>
   );
 });
@@ -105,7 +120,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  backgroundImage: {},
+  loadingContainer: {
+    flex: 1,
+    alignContent: 'center',
+    justifyContent: 'center',
+  },
+  loading: {},
 });
 
 export default Cardboard;
