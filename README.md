@@ -20,4 +20,5 @@ It's based on the following great technologies:
 
 ## Further Reading
 
+* https://solidproject.org/
 * https://www.geoffreylitt.com/2021/03/05/bring-your-own-client.html
