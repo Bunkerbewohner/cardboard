@@ -60,7 +60,7 @@ export function createCard(text: string): CardData {
     id: sanitize(text),
     title: text,
     position: 0,
-    content: '',
+    content: '# ' + text,
   };
 }
 

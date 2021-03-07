@@ -212,6 +212,8 @@ export async function loadCardboardMeta(file: string): Promise<CardboardData> {
 }
 
 export async function saveCardboard(cardboard: CardboardData) {
+  console.log(`Saving cardboard at ${cardboard.loadedFrom}...`);
+
   if (cardboard.dirty) {
     // TODO: Save modified metadata
   }
@@ -244,7 +246,16 @@ export async function saveCard(
   card: CardData,
 ) {
   const path = cardPath(cardboard, bucket, card);
-  await fs.writeTextFile(path, serializeCard(card));
+  const fileContent = serializeCard(card);
+
+  if (path.endsWith('.md')) {
+    // single-file based
+    await fs.writeTextFile(path, fileContent);
+  } else {
+    // folder based
+    await fs.mkdir(path);
+    await fs.writeTextFile(path + '/card.md', fileContent);
+  }
 }
 
 export function serializeCard(card: CardData): string {

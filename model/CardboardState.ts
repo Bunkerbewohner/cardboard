@@ -10,6 +10,7 @@ import {
 import {PlainFiles} from './backends/PlainFiles';
 import {nanoid} from 'nanoid/non-secure';
 import {CardboardBackend} from './CardboardBackend';
+import {stripFileExtension} from '../util/filesystem';
 
 class CardboardState {
   loading: boolean = true;
@@ -66,6 +67,7 @@ class CardboardState {
 
     const card = createCard(text.trim());
     card.position = bucket.cards.length;
+    card.dirty = true;
 
     // ensure unique id
     const desiredId = card.id;

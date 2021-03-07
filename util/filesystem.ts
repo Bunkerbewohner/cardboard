@@ -24,6 +24,11 @@ export async function writeTextFile(
   await rnfs.writeFile(filePath, content);
 }
 
+export async function mkdir(filePath: string) {
+  // TODO iOS: set NSURLIsExcludedFromBackupKey
+  await rnfs.mkdir(filePath);
+}
+
 export function basename(filePath: string): string {
   const parts = filePath.split('/');
   return parts[parts.length - 1];
