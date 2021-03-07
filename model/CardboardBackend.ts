@@ -1,5 +1,6 @@
-import {CardboardData} from './CardboardData';
+import {CardboardData, CardData} from './CardboardData';
 
 export interface CardboardBackend {
-  loadCardboard(path: string): Promise<CardboardData>;
+  loadCardboard(): Promise<CardboardData>;
+  saveCardboard(cardboard: CardboardData): Promise<void>;
 }

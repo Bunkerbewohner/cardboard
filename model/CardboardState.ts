@@ -9,18 +9,26 @@ import {
 } from './CardboardData';
 import {PlainFiles} from './backends/PlainFiles';
 import {nanoid} from 'nanoid/non-secure';
+import {CardboardBackend} from './CardboardBackend';
 
 class CardboardState {
   loading: boolean = true;
   cardboard: CardboardData = defaultCardboard();
 
+  backend: CardboardBackend;
+
   constructor() {
+    this.backend = new PlainFiles('.');
     makeAutoObservable(this);
   }
 
+  save() {
+    this.backend.saveCardboard(this.cardboard);
+  }
+
   async loadCardboard(path: string) {
-    const backend = new PlainFiles();
-    const cardboard = await backend.loadCardboard(path);
+    this.backend = new PlainFiles(path);
+    const cardboard = await this.backend.loadCardboard();
     runInAction(() => {
       console.log('successfully loaded cardboard into state');
       this.cardboard = cardboard;
@@ -43,6 +51,7 @@ class CardboardState {
     } while (true);
 
     this.cardboard.buckets.push(bucket);
+    this.save();
   }
 
   addCard(bucketId: string, text: string) {
@@ -69,6 +78,7 @@ class CardboardState {
     } while (true);
 
     bucket.cards.push(card);
+    this.save();
   }
 
   moveCard(
@@ -102,6 +112,23 @@ class CardboardState {
         destBucket.cards.splice(index + 1, 0, card);
       } else {
         destBucket.cards.push(card);
+      }
+    }
+
+    this._updateCardPositions(destBucket);
+    this.save();
+  }
+
+  /**
+   * Sets the position value of each card to its index in the card list.
+   * Serializes cards where the value changed.
+   */
+  _updateCardPositions(bucket: BucketData) {
+    for (let i = 0; i < bucket.cards.length; i++) {
+      const card = bucket.cards[i];
+      if (card.position !== i) {
+        card.position = i;
+        card.dirty = true;
       }
     }
   }

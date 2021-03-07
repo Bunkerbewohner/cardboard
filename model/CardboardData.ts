@@ -4,12 +4,16 @@ export interface CardboardData {
   boardName: string;
   description?: string;
   buckets: BucketData[];
+  /** can be a file path, URL etc. depending on the backend used */
+  loadedFrom: string;
+  dirty?: boolean;
 }
 
 export function defaultCardboard(): CardboardData {
   return {
     boardName: 'New Cardboard',
     buckets: [],
+    loadedFrom: '',
   };
 }
 
@@ -22,6 +26,7 @@ export interface BucketData {
   title: string;
   column: number;
   cards: CardData[];
+  dirty?: boolean;
 }
 
 export function createBucket(name: string): BucketData {
@@ -40,8 +45,14 @@ export interface BucketMatter {
 
 export interface CardData {
   id: string; // <PREFIX>-<HASH>
-  title: string;
+  /**
+   * The title of a card is always derived from the file's content or name.
+   * This field should be considered readonly.
+   */
+  readonly title: string;
   position: number;
+  content?: string; // entire file content
+  dirty?: boolean;
 }
 
 export function createCard(text: string): CardData {
@@ -49,10 +60,10 @@ export function createCard(text: string): CardData {
     id: sanitize(text),
     title: text,
     position: 0,
+    content: '',
   };
 }
 
 export interface CardMatter {
-  title?: string;
   position?: number;
 }

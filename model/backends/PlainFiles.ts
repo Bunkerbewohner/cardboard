@@ -15,10 +15,39 @@ import {
   CardMatter,
 } from '../CardboardData';
 import {CardboardBackend} from '../CardboardBackend';
+import * as fs from '../../util/filesystem';
+import yaml from 'js-yaml';
 
+/**
+ * Stores cards as regular folders and files.
+ * Ids of cards and buckets correspond to file / folder names.
+ * See `data/simple_board` for an example.
+ *
+ * Cardboard:
+ * An optional `board.md` can be defined at the root of the cardboard folder.
+ * See `CardboardMatter` for options, e.g. title of the board.
+ *
+ * Buckets:
+ * Top-level folders represent buckets. Name, description and column of the bucket
+ * can be defined via a bucket.md file in that folder. See `BucketMatter` interface.
+ *
+ * Cards:
+ * Within each bucket folder cards can be defined as files or folders.
+ * An empty .md file (e.g. `do dishes.md`) will be an unpositioned task "do dishes".
+ * The .md file can contain a title, description and meta data such as the position
+ * within the bucket. See `CardMatter`.
+ * An empty folder (e.g. `pay bills`) will also be an unpositioned task ("pay bills").
+ * Within card folders details can be specified using a `card.md` file.
+ */
 export class PlainFiles implements CardboardBackend {
-  async loadCardboard(path: string): Promise<CardboardData> {
-    return loadCardboard(path);
+  constructor(public readonly path: string) {}
+
+  async loadCardboard(): Promise<CardboardData> {
+    return loadCardboard(this.path);
+  }
+
+  async saveCardboard(cardboard: CardboardData) {
+    await saveCardboard(cardboard);
   }
 }
 
@@ -59,7 +88,7 @@ export async function loadCardsFromBucket(
   for (let file of files) {
     const fullpath = bucketPath + '/' + file;
     if (file !== 'bucket.md' && file.endsWith('.md')) {
-      cards.push(await loadCardMeta(fullpath));
+      cards.push(await loadCardMetaFromFile(fullpath));
     } else if (await isDirectory(fullpath)) {
       cards.push(await loadCardFolder(fullpath));
     } else {
@@ -70,33 +99,60 @@ export async function loadCardsFromBucket(
   return cards.sort((a, b) => a.position - b.position);
 }
 
-export async function loadCardFolder(cardPath: string): Promise<CardData> {
+export async function loadCardFolder(pathToCard: string): Promise<CardData> {
   try {
-    const card = await loadCardMeta(cardPath + '/card.md');
-    card.id = basename(cardPath);
-
+    const card = await loadCardMetaFromFile(pathToCard + '/card.md');
+    card.id = basename(pathToCard);
     return card;
   } catch (ex) {
+    // empty folder
     return {
-      id: basename(cardPath),
-      title: basename(cardPath),
+      id: basename(pathToCard),
+      title: basename(pathToCard),
       position: 0,
     };
   }
 }
 
-export async function loadCardMeta(file: string): Promise<CardData> {
-  const markdown = (await readFile(file)).toString();
-  const frontmatter = matter<CardMatter>(markdown);
+export function doesContentJustContainTitle(
+  markdownContent: string,
+  title: string,
+): boolean {
+  const content = markdownContent.trim();
 
-  return {
-    title:
-      frontmatter.attributes.title ||
-      loadCardTitle(frontmatter.body) ||
-      getFilenameAsTile(file),
-    id: basename(file).split('.', 2)[0],
+  return content === title || content === '# ' + title;
+}
+
+export async function loadCardMetaFromFile(
+  filepath: string,
+): Promise<CardData> {
+  const markdown = (await readFile(filepath)).toString();
+  const card = await loadCardMeta(markdown);
+  card.id = basename(filepath);
+
+  if (!card.title) {
+    // title is declared readonly for users of the API; this circumvents the type error
+    (card as any).title = getFilenameAsTile(filepath);
+  }
+
+  return card;
+}
+
+export async function loadCardMeta(markdown: string): Promise<CardData> {
+  const frontmatter = matter<CardMatter>(markdown);
+  const title = loadCardTitle(frontmatter.body);
+
+  const data: CardData = {
+    id: '', // determined by loadCardMetaFromFile
+    title: title,
     position: frontmatter.attributes.position || 0,
   };
+
+  const content = frontmatter.body.trim();
+  if (content) {
+    data.content = content;
+  }
+  return data;
 }
 
 function getFilenameAsTile(file: string): string {
@@ -143,12 +199,75 @@ export async function loadCardboardMeta(file: string): Promise<CardboardData> {
       boardName: frontmatter.attributes.title || basename(file),
       description: frontmatter.body,
       buckets: [],
+      loadedFrom: file,
     };
   } catch (ex) {
-    console.error(ex);
+    // no board metadata defined
     return {
       boardName: basename(file),
       buckets: [],
+      loadedFrom: file,
     };
+  }
+}
+
+export async function saveCardboard(cardboard: CardboardData) {
+  if (cardboard.dirty) {
+    // TODO: Save modified metadata
+  }
+
+  for (let bucket of cardboard.buckets) {
+    if (bucket.dirty) {
+      // TODO: Save modified metadata
+    }
+
+    for (let card of bucket.cards) {
+      if (card.dirty) {
+        delete card.dirty;
+        await saveCard(cardboard, bucket, card);
+      }
+    }
+  }
+}
+
+export function cardPath(
+  cardboard: CardboardData,
+  bucket: BucketData,
+  card: CardData,
+): string {
+  return `${cardboard.loadedFrom}/${bucket.id}/${card.id}`;
+}
+
+export async function saveCard(
+  cardboard: CardboardData,
+  bucket: BucketData,
+  card: CardData,
+) {
+  const path = cardPath(cardboard, bucket, card);
+  await fs.writeTextFile(path, serializeCard(card));
+}
+
+export function serializeCard(card: CardData): string {
+  const markdown = card.content;
+  const matterFields: any = {...card};
+  delete matterFields.dirty;
+  delete matterFields.id; // corresponds to the file name already, doesn't need to be saved
+  delete matterFields.title; // is derived from the markdown content (or filename)
+  delete matterFields.content; // saved below the frontmatter as the file content
+
+  if (matterFields.position === 0) {
+    delete matterFields.position;
+  }
+
+  if (Object.keys(matterFields).length === 0) {
+    return markdown || '';
+  }
+
+  const frontmatter = '---\n' + yaml.dump(matterFields) + '---\n';
+
+  if (markdown) {
+    return frontmatter + markdown;
+  } else {
+    return frontmatter;
   }
 }

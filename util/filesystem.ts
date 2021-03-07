@@ -17,6 +17,13 @@ export async function readTextFile(filePath: string): Promise<string> {
   return await rnfs.readFile(filePath);
 }
 
+export async function writeTextFile(
+  filePath: string,
+  content: string,
+): Promise<void> {
+  await rnfs.writeFile(filePath, content);
+}
+
 export function basename(filePath: string): string {
   const parts = filePath.split('/');
   return parts[parts.length - 1];

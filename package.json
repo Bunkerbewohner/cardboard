@@ -11,9 +11,11 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@types/js-yaml": "^4.0.0",
     "buffer": "^6.0.3",
     "front-matter": "^4.0.2",
     "git": "^0.1.5",
+    "js-yaml": "^4.0.0",
     "mobx": "^6.1.8",
     "mobx-react": "^7.1.0",
     "nanoid": "^3.1.20",
