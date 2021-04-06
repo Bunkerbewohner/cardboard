@@ -15,6 +15,7 @@ export interface DropTarget {
 }
 
 class UIState {
+  view: CardData | null = null;
   dragging: DragInfo | null = null;
   pan: Animated.ValueXY = new Animated.ValueXY();
   cardLayouts: {
@@ -29,6 +30,14 @@ class UIState {
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  openCard(card: CardData) {
+    this.view = card;
+  }
+
+  closeCard() {
+    this.view = null;
   }
 
   onDragStart(dragInfo: DragInfo) {

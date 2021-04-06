@@ -17,6 +17,10 @@ export async function readTextFile(filePath: string): Promise<string> {
   return await rnfs.readFile(filePath);
 }
 
+export async function exists(filePath: string): Promise<boolean> {
+  return await rnfs.exists(filePath);
+}
+
 export async function writeTextFile(
   filePath: string,
   content: string,

@@ -53,6 +53,12 @@ export class PlainFiles implements CardboardBackend {
 
 export async function loadCardboard(path: string): Promise<CardboardData> {
   console.log(`Loading cardboard from '${path}...`);
+
+  const exists = await fs.exists(path);
+  if (!exists) {
+    await fs.mkdir(path);
+  }
+
   const board = await loadCardboardMeta(path);
   board.buckets = await loadBuckets(path);
 
@@ -70,9 +76,12 @@ export async function loadBuckets(path: string): Promise<BucketData[]> {
         `Unexpected markdown file ${fullpath}: Cards must be in a bucket (subfolder)`,
       );
     } else if (file !== 'board.md') {
-      const bucket = await loadBucketMeta(fullpath);
-      bucket.cards = await loadCardsFromBucket(fullpath);
-      buckets.push(bucket);
+      const isDir = await fs.isDirectory(fullpath);
+      if (isDir) {
+        const bucket = await loadBucketMeta(fullpath);
+        bucket.cards = await loadCardsFromBucket(fullpath);
+        buckets.push(bucket);
+      }
     }
   }
 

@@ -55,33 +55,22 @@ const Card = observer(({card, bucket, isDragging, children}: CardProps) => {
 
   const onTouchEnd = (_: GestureResponderEvent) => {
     if (card) {
-      if (!isDragging) {
-        setDragging(false);
+      if (dragging) {
+        if (!isDragging) {
+          setDragging(false);
+        }
+        UIState.onDragEnd();
+      } else {
+        UIState.openCard(card);
       }
-      UIState.onDragEnd();
     }
   };
 
-  const onLayout = (e: LayoutChangeEvent) => {
-    if (card && !isDragging && !!bucket) {
-      UIState.registerCardLayout(bucket, card, e.nativeEvent.layout);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (card && bucket) {
-        UIState.unregisterCardLayout(bucket, card);
-      }
-    };
-  }, [bucket, card]);
-
-  const shouldHide = !!UIState.dropTarget && dragging;
+  const shouldHide = UIState.dropTarget && dragging;
 
   return (
     <View
       ref={viewRef}
-      onLayout={onLayout}
       style={[
         styles.root,
         dragging && styles.dragging,

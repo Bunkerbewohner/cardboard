@@ -7,7 +7,7 @@ import {observer} from 'mobx-react';
 
 declare const global: {HermesInternal: null | {}};
 
-CardboardState.loadCardboard('/Users/mathias/Code/cardboard/.tasks');
+CardboardState.loadCardboard('/Users/mathias/Code/cardboard/tasks');
 
 const App = observer(() => {
   const board = CardboardState.cardboard;

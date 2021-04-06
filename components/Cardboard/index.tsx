@@ -4,7 +4,6 @@ import {
   Animated,
   GestureResponderEvent,
   ImageBackground,
-  Keyboard,
   PanResponder,
   StyleSheet,
   Text,
@@ -21,6 +20,8 @@ import UIState from '../../model/UIState';
 import backgroundImage from '../../backgrounds/mountains.jpg';
 import AddBucketButton from '../AddBucketButton';
 import CardboardState from '../../model/CardboardState';
+import CardDetails from '../CardDetails';
+import Modal from '../Modal';
 
 interface CardboardProps {
   board: CardboardData;
@@ -76,13 +77,18 @@ const Cardboard = observer(({board}: CardboardProps) => {
           />
         </View>
       )}
+      <Modal
+        visible={!!UIState.view}
+        onRequestClose={() => UIState.closeCard()}>
+        {UIState.view && <CardDetails card={UIState.view!} />}
+      </Modal>
       {!CardboardState.loading && (
         <View
           style={styles.root}
           {...panResponder.panHandlers}
           onTouchMove={onTouchMove}>
           <View style={styles.header}>
-            <Text style={styles.title}>Hello, {board.boardName}!</Text>
+            <Text style={styles.title}>{board.boardName}</Text>
           </View>
           <View style={styles.buckets}>
             {board.buckets.map((bucket) => (

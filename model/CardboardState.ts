@@ -10,7 +10,6 @@ import {
 import {PlainFiles} from './backends/PlainFiles';
 import {nanoid} from 'nanoid/non-secure';
 import {CardboardBackend} from './CardboardBackend';
-import {stripFileExtension} from '../util/filesystem';
 
 class CardboardState {
   loading: boolean = true;
